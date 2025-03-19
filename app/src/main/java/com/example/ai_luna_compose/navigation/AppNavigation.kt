@@ -13,6 +13,7 @@ import com.example.ai_luna_compose.ui.screen.splash.SplashScreenView
 object NavRoutes {
     const val SPLASH = "splash"
     const val MAIN = "main"
+    const val CHAT_DETAIL = "chatDetail"
 }
 
 @Composable
@@ -28,6 +29,9 @@ fun MyAppNavigation() {
             }
             composable(NavRoutes.MAIN) {
                 MainScreenView()
+            }
+            composable(NavRoutes.CHAT_DETAIL) {
+                //TODO ChatDetailScreenView()
             }
         }
     }
