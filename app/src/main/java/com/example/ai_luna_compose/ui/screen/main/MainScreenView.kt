@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.ai_luna_compose.R
 import com.example.ai_luna_compose.ui.common.TitleBar
+import com.example.ai_luna_compose.ui.common.TitleBarType
 
 enum class ScreenTab {
     Tarot, Chat
@@ -42,13 +43,24 @@ fun MainScreenView() {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TitleBar(
-                    currentTab = selectedTab,
-                    hasUnreadNotification = hasUnreadNotification,
-                    onAlarmClick = {
-                        // 알림 아이콘 클릭 시 동작 (알림 화면은 미구현)
+                when (selectedTab) {
+                    ScreenTab.Tarot -> {
+                        TitleBar(
+                            type = TitleBarType.TEXT_AND_ICON,
+                            title = "Luna",
+                            iconRes = if (hasUnreadNotification) R.drawable.alarm_on else R.drawable.alarm_off,
+                            onIconClick = {
+                                // 알림 아이콘 클릭 시 동작 (알림 화면은 미구현)
+                            }
+                        )
                     }
-                )
+                    ScreenTab.Chat -> {
+                        TitleBar(
+                            type = TitleBarType.TEXT_ONLY,
+                            title = "Chat"
+                        )
+                    }
+                }
             },
             bottomBar = {
                 BottomBar(
@@ -62,7 +74,12 @@ fun MainScreenView() {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                )
+                ) {
+                    when (selectedTab) {
+                        ScreenTab.Tarot -> TarotScreen()
+                        ScreenTab.Chat -> ChatScreen()
+                    }
+                }
             }
         )
     }
@@ -83,7 +100,6 @@ fun BottomBar(
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
                 color = MaterialTheme.colorScheme.background
             )
-// 높이를 늘려 텍스트가 잘리지 않도록 함.
     ) {
         Row(
             modifier = Modifier

@@ -1,4 +1,5 @@
 package com.example.ai_luna_compose.ui.common.etc
+
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -26,18 +27,18 @@ private fun lerp(start: Float, stop: Float, fraction: Float): Float {
 fun <T> HorizontalViewPager(
     itemList: List<T>,
     modifier: Modifier = Modifier,
-    // 사용자가 조절할 수 있는 아이템 간의 간격 파라미터
+    height : Dp = 172.dp,
     itemSpacing: Dp = 16.dp,
     itemContent: @Composable (T) -> Unit
 ) {
     // PagerState 생성 시, 페이지 개수를 람다로 전달합니다.
     val pagerState = rememberPagerState { itemList.size }
 
-    // contentPadding을 itemSpacing으로 설정하여, 좌우 여백을 줍니다.
+    // contentPadding을 itemSpacing으로 설정하여 좌우 여백을 줍니다.
     HorizontalPager(
         state = pagerState,
         contentPadding = PaddingValues(horizontal = itemSpacing),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().wrapContentHeight()
     ) { page ->
         // 현재 페이지와의 오프셋 계산 (중앙에서 얼마나 떨어져 있는지)
         val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
@@ -49,38 +50,13 @@ fun <T> HorizontalViewPager(
 
         Box(
             modifier = Modifier
-                // 각 아이템에 좌우 itemSpacing/2 만큼 패딩을 추가하여, 아이템 간의 간격을 조절
                 .padding(horizontal = itemSpacing / 2)
                 .graphicsLayer { scaleY = animatedScale }
+                // .fillMaxWidth().aspectRatio(1f) 대신:
                 .fillMaxWidth()
-                .aspectRatio(1f)
+                .height(height)
         ) {
             itemContent(itemList[page])
         }
     }
 }
-
-
-@Composable
-fun SampleHorizontalViewPager() {
-    // 예시 아이템 목록
-    val items = listOf("One", "Two", "Three", "Four")
-
-    // HorizontalViewPager 호출, itemSpacing을 24.dp로 조절
-    HorizontalViewPager(
-        itemList = items,
-        itemSpacing = 24.dp
-    ) { item ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = item, color = Color.Black)
-        }
-    }
-}
-
-
-
