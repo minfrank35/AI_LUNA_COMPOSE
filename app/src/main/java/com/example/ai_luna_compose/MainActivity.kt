@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import com.example.ai_luna_compose.navigation.MyAppNavigation
 import com.example.ai_luna_compose.ui.theme.AI_LUNA_COMPOSETheme
+import com.google.ar.core.ArCoreApk
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
