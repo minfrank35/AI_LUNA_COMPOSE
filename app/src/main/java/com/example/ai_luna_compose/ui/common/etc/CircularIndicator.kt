@@ -1,4 +1,4 @@
-package com.example.ai_luna_compose.ui.common
+package com.example.ai_luna_compose.ui.common.etc
 
 import android.graphics.BlurMaskFilter
 import android.graphics.Paint as AndroidPaint
@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun CircularIndicator(
