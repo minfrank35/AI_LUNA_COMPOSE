@@ -1,85 +1,85 @@
 package com.example.ai_luna_compose.ui.common
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Text
+import android.graphics.BlurMaskFilter
+import android.graphics.Paint as AndroidPaint
+import android.graphics.RectF
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.absoluteValue
 
-// 간단한 보간 함수: start와 end 사이를 fraction 만큼 보간
-private fun lerp(start: Float, stop: Float, fraction: Float): Float {
-    return start + (stop - start) * fraction
-}
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun <T> HorizontalViewPager(
-    itemList: List<T>,
-    modifier: Modifier = Modifier,
-    // 사용자가 조절할 수 있는 아이템 간의 간격 파라미터
-    itemSpacing: Dp = 16.dp,
-    itemContent: @Composable (T) -> Unit
+fun CircularIndicator(
+    loadingTime: Long,
+    indicatorColor: Color,
+    strokeWidth: Dp,
+    radius: Dp, // radius를 Dp 타입으로 변경
+    onAnimationFinished: () -> Unit = {},
+    content: @Composable () -> Unit
 ) {
-    // PagerState 생성 시, 페이지 개수를 람다로 전달합니다.
-    val pagerState = rememberPagerState { itemList.size }
-
-    // contentPadding을 itemSpacing으로 설정하여, 좌우 여백을 줍니다.
-    HorizontalPager(
-        state = pagerState,
-        contentPadding = PaddingValues(horizontal = itemSpacing),
-        modifier = modifier.fillMaxWidth()
-    ) { page ->
-        // 현재 페이지와의 오프셋 계산 (중앙에서 얼마나 떨어져 있는지)
-        val pageOffset = ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
-            .absoluteValue
-
-        // 중앙은 scale 1.0, 옆은 scale 0.8 정도로 보간하여 적용
-        val scale = lerp(0.8f, 1.0f, (1 - pageOffset).coerceIn(0f, 1f))
-        val animatedScale by animateFloatAsState(targetValue = scale)
-
-        Box(
-            modifier = Modifier
-                // 각 아이템에 좌우 itemSpacing/2 만큼 패딩을 추가하여, 아이템 간의 간격을 조절
-                .padding(horizontal = itemSpacing / 2)
-                .graphicsLayer { scaleY = animatedScale }
-                .fillMaxWidth()
-                .aspectRatio(1f)
-        ) {
-            itemContent(itemList[page])
-        }
+    val colorValue = indicatorColor
+    // Animatable을 사용해 0f부터 360f까지 애니메이션 (한 번만 실행)
+    val animatedAngle = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        animatedAngle.animateTo(
+            targetValue = 360f,
+            animationSpec = tween(
+                durationMillis = loadingTime.toInt(),
+                easing = FastOutSlowInEasing // Ease in ease out 효과 적용
+            )
+        )
+        onAnimationFinished()
     }
-}
 
+    Box(
+        modifier = Modifier.size(radius * 2),
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.padding(strokeWidth).fillMaxSize()) {
+            val strokeWidthPx = strokeWidth.toPx()
 
-@Composable
-fun SampleHorizontalViewPager() {
-    // 예시 아이템 목록
-    val items = listOf("One", "Two", "Three", "Four")
-
-    // HorizontalViewPager 호출, itemSpacing을 24.dp로 조절
-    HorizontalViewPager(
-        itemList = items,
-        itemSpacing = 24.dp
-    ) { item ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = item, color = Color.Black)
+            drawIntoCanvas { canvas ->
+                val glowPaint = AndroidPaint().apply {
+                    color = colorValue.toArgb()
+                    style = AndroidPaint.Style.STROKE
+                    this.strokeWidth = strokeWidthPx
+                    strokeCap = AndroidPaint.Cap.ROUND
+                    maskFilter = BlurMaskFilter(15f, BlurMaskFilter.Blur.NORMAL)
+                }
+                val arcRect = RectF(0f, 0f, size.width, size.height)
+                canvas.nativeCanvas.drawArc(
+                    arcRect,
+                    -90f,
+                    animatedAngle.value,
+                    false,
+                    glowPaint
+                )
+            }
+            drawArc(
+                color = colorValue,
+                startAngle = -90f,
+                sweepAngle = animatedAngle.value,
+                useCenter = false,
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+            )
         }
+        content()
     }
 }
