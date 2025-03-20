@@ -20,3 +20,7 @@ val FONT_FIGTREE = FontFamily(
     Font(R.font.figtree_black, weight = FontWeight.Black),
     Font(R.font.figtree_semibold, weight = FontWeight.SemiBold),
 )
+
+val FONT_GOWUN_DODUM = FontFamily(
+    Font(R.font.gowun_dodum_regular, weight = FontWeight.Normal),
+)

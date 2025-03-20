@@ -30,6 +30,8 @@ class ARUtil {
             }
         }
 
+
+
         // Verify that ARCore is installed and using the current version.
         //TODO :: 설정
 //        fun isARCoreSupportedAndUpToDate(): Boolean {

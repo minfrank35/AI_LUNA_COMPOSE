@@ -7,12 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -33,6 +38,9 @@ import com.example.ai_luna_compose.R
 import com.example.ai_luna_compose.ui.common.TitleBar
 import com.example.ai_luna_compose.ui.common.TitleBarType
 import com.example.ai_luna_compose.ui.common.etc.HorizontalViewPager
+import com.example.ai_luna_compose.ui.theme.Gray
+import com.example.ai_luna_compose.ui.theme.TypographyKorean
+import com.example.ai_luna_compose.ui.theme.Yellow
 import kotlin.math.absoluteValue
 
 // 보간 함수: start와 end 사이를 fraction만큼 보간
@@ -43,7 +51,7 @@ private fun lerp(start: Float, stop: Float, fraction: Float): Float {
 @Composable
 fun TarotScreen() {
     // 탭 상태 관리 (초기값: "Love")
-    var selectedTab by remember { mutableStateOf("Love") }
+    var selectedTab by remember { mutableStateOf("인기 타로") }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TarotViewPager()
@@ -56,7 +64,8 @@ fun TarotScreen() {
 @Composable
 fun TarotViewPager() {
     // tarot 이미지 리소스 목록 (실제 drawable 이름으로 교체하세요)
-    val tarotImages = listOf(R.drawable.banner_luna, R.drawable.banner_couple, R.drawable.banner_money)
+    val tarotImages =
+        listOf(R.drawable.banner_luna, R.drawable.banner_couple, R.drawable.banner_money)
 
     // HorizontalViewPager 호출, 높이를 디자인 기준(예: 163.dp)로 지정
     HorizontalViewPager(
@@ -90,18 +99,26 @@ fun TarotTitle() {
 @Composable
 fun TarotTab(selectedTab: String, onTabSelected: (String) -> Unit) {
     // 탭 항목 목록
-    val tabs = listOf("Love", "Career", "Money")
+    val tabs = listOf("인기 타로", "재물 사업운", "연애운")
+    // 각 탭에 해당하는 아이콘 리소스 매핑
+    val tabImages = mapOf(
+        "인기 타로" to painterResource(id = R.drawable.star_linear),
+        "재물 사업운" to painterResource(id = R.drawable.money_linear),
+        "연애운" to painterResource(id = R.drawable.heart_linear)
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 23.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         tabs.forEach { tab ->
             TarotTabItem(
                 text = tab,
+                image = tabImages[tab] ?: painterResource(id = R.drawable.tarot_tint),
                 isSelected = tab == selectedTab,
                 onClick = { onTabSelected(tab) }
             )
@@ -110,53 +127,126 @@ fun TarotTab(selectedTab: String, onTabSelected: (String) -> Unit) {
 }
 
 @Composable
-fun TarotTabItem(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-    val textColor = if (isSelected) Color.White else Color.Gray
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyLarge,
-        color = textColor,
+fun TarotTabItem(
+    text: String,
+    image: Painter,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (!isSelected) MaterialTheme.colorScheme.background else Yellow
+    Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(4.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(100)
+            )
             .clickable { onClick() }
-    )
+            .padding(top = 9.dp, bottom = 9.dp, start = 16.dp, end = 16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = image,
+            contentDescription = null
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = TypographyKorean.titleLarge
+        )
+    }
 }
+
+// 질문 데이터를 담을 데이터 클래스
+data class TarotQuestion(
+    val question: String,
+    val viewCount: String,
+    val thumbnailResId: Int,
+    val category: String  // 예: "인기 타로", "재물 사업운", "연애운"
+)
+
 
 @Composable
 fun TarotTabList(selectedTab: String) {
-    // 선택된 탭에 따라 다른 타로 질문 목록 표시
-    val questions = when (selectedTab) {
-        "Love" -> listOf(
-            "Do I meet my soulmate?",
-            "Will my relationship last?",
-            "How can I improve my love life?"
-        )
-        "Career" -> listOf(
-            "Is my career on the right path?",
-            "Should I switch jobs?",
-            "How can I achieve my professional goals?"
-        )
-        "Money" -> listOf(
-            "Will my finances improve?",
-            "Is now a good time to invest?",
-            "How can I manage my money better?"
-        )
-        else -> emptyList()
-    }
-    Column(
+    // 전체 질문 항목 목록 (총 9개)
+    val questions = listOf(
+        TarotQuestion("0월 00일 오늘의 운세", "조회수 1만+", R.drawable.rab_today, "인기 타로"),
+        TarotQuestion("인기 (남, 녀) 되는법", "조회수 1만+", R.drawable.rab_popular, "인기 타로"),
+        TarotQuestion("솔로탈출 시기", "조회수 1만+", R.drawable.rab_solo_escape, "인기 타로"),
+        TarotQuestion("2025년 신년 재물운", "조회수 1만+", R.drawable.rab_money_2025, "재물 사업운"),
+        TarotQuestion("사업 시작할까요 말까요?", "조회수 1만+", R.drawable.rab_business_start, "재물 사업운"),
+        TarotQuestion("부자 될 수 있을까요?", "조회수 1만+", R.drawable.rab_rich, "재물 사업운"),
+        TarotQuestion("2025년 상반기 연애운", "조회수 1만+", R.drawable.rab_couple_2025, "연애운"),
+        TarotQuestion("결혼은 언제하는게 좋을까?", "조회수 1만+", R.drawable.rab_marry_when, "연애운"),
+        TarotQuestion("그 사람, 나를 좋아할까?", "조회수 1만+", R.drawable.rab_like_me, "연애운")
+    )
+    // 선택된 탭에 해당하는 질문만 필터링
+    val filteredQuestions = questions.filter { it.category == selectedTab }
+
+    // Card로 감싸서 elevation 적용
+    Card(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(start = 24.dp, end = 24.dp, top = 21.dp, bottom = 21.dp),
+        shape = RoundedCornerShape(5.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.background)
     ) {
-        questions.forEach { question ->
+        LazyColumn(
+            modifier = Modifier.padding(15.dp)
+        ) {
+            itemsIndexed(filteredQuestions) { index, question ->
+                QuestionListItem(
+                    thumbnailPainter = painterResource(id = question.thumbnailResId),
+                    questionTitle = question.question,
+                    viewCount = question.viewCount
+                )
+                if (index < filteredQuestions.lastIndex) {
+                    Divider(
+                        modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
+                        color = Color.Gray,
+                        thickness = 1.dp
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun QuestionListItem(
+    thumbnailPainter: Painter,
+    questionTitle: String,
+    viewCount: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.Transparent)
+    ) {
+        // 질문 대표 이미지 (썸네일)
+        Image(
+            painter = thumbnailPainter,
+            contentDescription = "Question Thumbnail",
+            modifier = Modifier.size(64.dp)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            // 질문 제목
             Text(
-                text = question,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
+                text = questionTitle,
+                style = TypographyKorean.titleMedium, // 미리 정의된 TypographyKorean 스타일 사용
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            // 조회수 텍스트
+            Text(
+                text = viewCount,
+                style = TypographyKorean.titleSmall, // 미리 정의된 TypographyKorean 스타일 사용
             )
         }
     }
 }
+

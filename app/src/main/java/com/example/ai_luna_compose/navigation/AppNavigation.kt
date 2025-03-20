@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ai_luna_compose.ui.screen.chat.ChatDetailScreenView
 import com.example.ai_luna_compose.ui.screen.main.MainScreenView
 import com.example.ai_luna_compose.ui.screen.splash.SplashScreenView
 
@@ -31,7 +32,7 @@ fun MyAppNavigation() {
                 MainScreenView()
             }
             composable(NavRoutes.CHAT_DETAIL) {
-                //TODO ChatDetailScreenView()
+                ChatDetailScreenView()
             }
         }
     }

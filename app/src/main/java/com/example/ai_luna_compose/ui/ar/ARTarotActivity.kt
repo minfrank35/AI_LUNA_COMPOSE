@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.ai_luna_compose.util.PermissionUtil
 import com.google.ar.core.ArCoreApk
+import com.google.ar.core.Config
 import com.google.ar.core.Session
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
 
@@ -23,7 +24,7 @@ class ARTarotActivity : ComponentActivity(){
                 when (ArCoreApk.getInstance().requestInstall(this, mUserRequestedInstall)) {
                     ArCoreApk.InstallStatus.INSTALLED -> {
                         // Success: Safe to create the AR session.
-                        mSession = Session(this)
+                        createSession()
                     }
                     ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
                         // When this method returns `INSTALL_REQUESTED`:
@@ -47,6 +48,25 @@ class ARTarotActivity : ComponentActivity(){
         } catch (e : Exception) {
             return  // mSession remains null, since session creation has failed.
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mSession?.close()
+        mSession = null
+    }
+    fun createSession() {
+        // Create a new ARCore session.
+        mSession = Session(this)
+
+        // Create a session config.
+        val config = Config(mSession)
+
+        // Do feature-specific operations here, such as enabling depth or turning on
+        // support for Augmented Faces.
+
+        // Configure the session.
+        mSession!!.configure(config)
     }
 
     override fun onRequestPermissionsResult(
