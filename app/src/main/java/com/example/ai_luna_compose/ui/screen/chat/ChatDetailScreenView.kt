@@ -4,6 +4,7 @@ import android.view.ViewTreeObserver
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,8 +41,11 @@ import com.example.ai_luna_compose.ui.theme.FONT_GOWUN_DODUM
 import com.example.ai_luna_compose.ui.theme.Gray
 import com.example.ai_luna_compose.ui.theme.TypographyKorean
 import com.example.ai_luna_compose.util.Keyboard
+import com.example.ai_luna_compose.util.KeyboardAnimationEffect
 import com.example.ai_luna_compose.util.TimeUtil
 import com.example.ai_luna_compose.util.keyboardAsState
+import com.example.ai_luna_compose.util.setInsetsAnimationCallback
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,17 +53,41 @@ import kotlinx.coroutines.launch
 fun ChatDetailScreenView() {
     // 예시 채팅 데이터: 채팅 메시지와 시간 정보를 포함한 람다 리스트
     val viewModel: ChatDetailViewModel = viewModel()
-
-    var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
-    val isKeyboardOpen by keyboardAsState()
     val coroutineScope = rememberCoroutineScope()
+//    val isKeyboardOpen by keyboardAsState()
 
     LaunchedEffect(key1 = viewModel.chatList.size) {
         if (viewModel.chatList.isNotEmpty()) {
             listState.scrollToItem(viewModel.chatList.size - 1)
         }
     }
+    val progressFraction = remember { mutableStateOf(0f) }
+    // 스크롤 대상 오프셋 계산(예시: 최대 스크롤 오프셋을 키보드 진행률과 연동)
+    // 실제 계산은 여러분의 레이아웃에 맞게 조정해야 합니다.
+
+    // 애니메이션 진행률에 따라 스크롤을 업데이트 (여기서는 단순 예시로 100dp 만큼 스크롤한다고 가정)
+    LaunchedEffect(progressFraction.value) {
+        // progressFraction 값이 바뀔 때마다 스크롤을 조금씩 업데이트
+        // 예: progressFraction이 0.5라면 50dp 만큼 스크롤하도록
+        val targetOffset = progressFraction.value * 3000  // 여기서 100은 조정 가능한 값
+        listState.scrollBy(targetOffset)
+    }
+
+    KeyboardAnimationEffect(
+        onProgressFraction = { fraction ->
+            progressFraction.value = fraction
+        },
+        onAnimationEnd = {
+            // 애니메이션 종료 시 최종 스크롤 위치 조정
+            coroutineScope.launch {
+                if (viewModel.chatList.isNotEmpty()) {
+                    listState.animateScrollToItem(viewModel.chatList.size - 1)
+                }
+            }
+        }
+    )
+
 
     Box {
         Image(
@@ -81,7 +110,7 @@ fun ChatDetailScreenView() {
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(bottom = 7.dp, start = 16.dp, end = 16.dp),
                 state = listState,
             ) {
                 itemsIndexed(viewModel.chatList) { index, currItem ->
@@ -101,18 +130,13 @@ fun ChatDetailScreenView() {
                     }
                 }
 
-                if (isKeyboardOpen == Keyboard.Opened) {
-                    coroutineScope.launch {
-                        listState.scrollToItem(viewModel.chatList.size - 1)
-                    }
-                }
             }
             // 하단 입력 영역: TextField와 전송 버튼
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
-                    .padding(start = 10.dp, bottom = 17.dp, end = 10.dp),
+                    .padding(start = 16.dp, bottom = 17.dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
@@ -122,8 +146,8 @@ fun ChatDetailScreenView() {
                         .background(color = Color.White, shape = RoundedCornerShape(20.dp))
                 ) {
                     BasicTextField(
-                        value = messageText,
-                        onValueChange = { messageText = it },
+                        value = viewModel.messageText,
+                        onValueChange = { viewModel.messageText = it },
                         textStyle = TypographyKorean.bodyMedium.copy(color = Color.Black),
                         modifier = Modifier.fillMaxSize(),
                         decorationBox = { innerTextField ->
@@ -133,7 +157,7 @@ fun ChatDetailScreenView() {
                                     .padding(start = 15.dp, end = 15.dp),
                                 contentAlignment = Alignment.CenterStart
                             ) {
-                                if (messageText.isEmpty()) {
+                                if (viewModel.messageText.isEmpty()) {
                                     Text(
                                         text = "메시지 입력",
                                         style = TypographyKorean.bodyMedium.copy(color = Color.Black)
@@ -148,15 +172,12 @@ fun ChatDetailScreenView() {
                 Spacer(modifier = Modifier.width(14.dp))
                 Image(
                     modifier = Modifier
-                        .background(if(messageText.isEmpty()) Color.Gray else Color.White, shape = CircleShape)
+                        .background(
+                            if (viewModel.messageText.isEmpty()) Color.Gray else Color.White,
+                            shape = CircleShape
+                        )
                         .clickable {
-                            viewModel.addChatItem(
-                                chatItem = ChatUIItem(
-                                    chatItemType = ChatItemType.Me,
-                                    text = messageText,
-                                    time = TimeUtil.getCurrentTime()
-                                )
-                            )
+                            viewModel.onClickMsgSendBtn()
                         }
                         .padding(horizontal = 10.dp, vertical = 10.dp),
                     painter = painterResource(id = R.drawable.arrow_right),

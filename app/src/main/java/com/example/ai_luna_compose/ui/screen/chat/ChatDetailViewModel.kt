@@ -1,12 +1,18 @@
 package com.example.ai_luna_compose.ui.screen.chat
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.ai_luna_compose.R
+import com.example.ai_luna_compose.util.TimeUtil
 
 class ChatDetailViewModel : ViewModel() {
 
     val chatList = mutableStateListOf<ChatUIItem>()
+    var messageText by mutableStateOf("")
 
     init {
         getChatList()
@@ -49,7 +55,17 @@ class ChatDetailViewModel : ViewModel() {
         chatList.addAll(chatItems)
     }
 
-    fun addChatItem(chatItem: ChatUIItem) {
+    fun onClickMsgSendBtn() {
+        if(messageText.isEmpty()) return
+
+        val chatItem = ChatUIItem(
+            chatItemType = ChatItemType.Me,
+            text = messageText,
+            time = TimeUtil.getCurrentTime()
+        )
         chatList.add(chatItem)
+        messageText = ""
     }
+
+
 }
