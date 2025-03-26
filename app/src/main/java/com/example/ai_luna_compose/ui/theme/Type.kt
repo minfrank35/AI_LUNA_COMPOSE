@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // FONT_FAUSTINA는 프로젝트 내에 미리 정의되어 있다고 가정합니다.
@@ -63,6 +64,12 @@ val TypographyKorean = Typography(
         fontFamily = FONT_GOWUN_DODUM,
         fontWeight = FontWeight.Normal,
         fontSize = 9.sp,
+        color = Color.White
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = FONT_GOWUN_DODUM,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
         color = Color.White
     )
 )

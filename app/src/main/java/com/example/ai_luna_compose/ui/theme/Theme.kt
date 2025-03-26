@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
+    primary = Color.Black,
     secondary = PurpleGrey40,
     tertiary = Pink40,
     background = BlackTrans,
@@ -31,7 +31,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun AI_LUNA_COMPOSETheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit

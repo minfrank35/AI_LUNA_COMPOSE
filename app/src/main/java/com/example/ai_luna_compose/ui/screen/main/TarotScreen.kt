@@ -1,14 +1,12 @@
 package com.example.ai_luna_compose.ui.screen.main
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -26,15 +24,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.ai_luna_compose.R
+import com.example.ai_luna_compose.navigation.LocalNavController
+import com.example.ai_luna_compose.navigation.NavRoutes
 import com.example.ai_luna_compose.ui.common.TitleBar
 import com.example.ai_luna_compose.ui.common.TitleBarType
 import com.example.ai_luna_compose.ui.common.etc.HorizontalViewPager
@@ -50,7 +48,7 @@ private fun lerp(start: Float, stop: Float, fraction: Float): Float {
 
 @Composable
 fun TarotScreen() {
-    // 탭 상태 관리 (초기값: "Love")
+    // 탭 상태 관리 (초기값: "인기 타로")
     var selectedTab by remember { mutableStateOf("인기 타로") }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -162,23 +160,43 @@ data class TarotQuestion(
     val question: String,
     val viewCount: String,
     val thumbnailResId: Int,
-    val category: String  // 예: "인기 타로", "재물 사업운", "연애운"
+    val category: String,  // 예: "인기 타로", "재물 사업운", "연애운"
+    val onClick: () -> Unit
 )
-
 
 @Composable
 fun TarotTabList(selectedTab: String) {
+    val navController = LocalNavController.current
     // 전체 질문 항목 목록 (총 9개)
     val questions = listOf(
-        TarotQuestion("0월 00일 오늘의 운세", "조회수 1만+", R.drawable.rab_today, "인기 타로"),
-        TarotQuestion("인기 (남, 녀) 되는법", "조회수 1만+", R.drawable.rab_popular, "인기 타로"),
-        TarotQuestion("솔로탈출 시기", "조회수 1만+", R.drawable.rab_solo_escape, "인기 타로"),
-        TarotQuestion("2025년 신년 재물운", "조회수 1만+", R.drawable.rab_money_2025, "재물 사업운"),
-        TarotQuestion("사업 시작할까요 말까요?", "조회수 1만+", R.drawable.rab_business_start, "재물 사업운"),
-        TarotQuestion("부자 될 수 있을까요?", "조회수 1만+", R.drawable.rab_rich, "재물 사업운"),
-        TarotQuestion("2025년 상반기 연애운", "조회수 1만+", R.drawable.rab_couple_2025, "연애운"),
-        TarotQuestion("결혼은 언제하는게 좋을까?", "조회수 1만+", R.drawable.rab_marry_when, "연애운"),
-        TarotQuestion("그 사람, 나를 좋아할까?", "조회수 1만+", R.drawable.rab_like_me, "연애운")
+        TarotQuestion("0월 00일 오늘의 운세", "조회수 1만+", R.drawable.rab_today, "인기 타로") {
+            // "0월 00일 오늘의 운세" 클릭 시 처리
+             navController.navigate(NavRoutes.CHAT_DETAIL)
+        },
+        TarotQuestion("인기 (남, 녀) 되는법", "조회수 1만+", R.drawable.rab_popular, "인기 타로") {
+            // "인기 (남, 녀) 되는법" 클릭 시 처리
+        },
+        TarotQuestion("솔로탈출 시기", "조회수 1만+", R.drawable.rab_solo_escape, "인기 타로") {
+            // "솔로탈출 시기" 클릭 시 처리
+        },
+        TarotQuestion("2025년 신년 재물운", "조회수 1만+", R.drawable.rab_money_2025, "재물 사업운") {
+            // "2025년 신년 재물운" 클릭 시 처리
+        },
+        TarotQuestion("사업 시작할까요 말까요?", "조회수 1만+", R.drawable.rab_business_start, "재물 사업운") {
+            // "사업 시작할까요 말까요?" 클릭 시 처리
+        },
+        TarotQuestion("부자 될 수 있을까요?", "조회수 1만+", R.drawable.rab_rich, "재물 사업운") {
+            // "부자 될 수 있을까요?" 클릭 시 처리
+        },
+        TarotQuestion("2025년 상반기 연애운", "조회수 1만+", R.drawable.rab_couple_2025, "연애운") {
+            // "2025년 상반기 연애운" 클릭 시 처리
+        },
+        TarotQuestion("결혼은 언제하는게 좋을까?", "조회수 1만+", R.drawable.rab_marry_when, "연애운") {
+            // "결혼은 언제하는게 좋을까?" 클릭 시 처리
+        },
+        TarotQuestion("그 사람, 나를 좋아할까?", "조회수 1만+", R.drawable.rab_like_me, "연애운") {
+            // "그 사람, 나를 좋아할까?" 클릭 시 처리
+        }
     )
     // 선택된 탭에 해당하는 질문만 필터링
     val filteredQuestions = questions.filter { it.category == selectedTab }
@@ -198,7 +216,8 @@ fun TarotTabList(selectedTab: String) {
                 QuestionListItem(
                     thumbnailPainter = painterResource(id = question.thumbnailResId),
                     questionTitle = question.question,
-                    viewCount = question.viewCount
+                    viewCount = question.viewCount,
+                    onClick = question.onClick // onClick 추가
                 )
                 if (index < filteredQuestions.lastIndex) {
                     Divider(
@@ -212,17 +231,18 @@ fun TarotTabList(selectedTab: String) {
     }
 }
 
-
 @Composable
 fun QuestionListItem(
     thumbnailPainter: Painter,
     questionTitle: String,
-    viewCount: String
+    viewCount: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.Transparent)
+            .clickable { onClick() }
     ) {
         // 질문 대표 이미지 (썸네일)
         Image(
@@ -231,22 +251,20 @@ fun QuestionListItem(
             modifier = Modifier.size(64.dp)
         )
         Spacer(modifier = Modifier.width(16.dp))
-
         Column(
             modifier = Modifier.weight(1f)
         ) {
             // 질문 제목
             Text(
                 text = questionTitle,
-                style = TypographyKorean.titleMedium, // 미리 정의된 TypographyKorean 스타일 사용
+                style = TypographyKorean.titleMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
             // 조회수 텍스트
             Text(
                 text = viewCount,
-                style = TypographyKorean.titleSmall, // 미리 정의된 TypographyKorean 스타일 사용
+                style = TypographyKorean.titleSmall,
             )
         }
     }
 }
-
