@@ -22,9 +22,6 @@ class ChatDetailViewModel @Inject constructor(private val repository: ChatDetail
 
     val chatList = mutableStateListOf<ChatItemEntity>()
     var messageText by mutableStateOf("")
-    var isShowDialog by mutableStateOf(false)
-
-    private val alertDialogData = mutableStateOf<GlobalDialogData?>(null)
 
     init {
         getChatList()

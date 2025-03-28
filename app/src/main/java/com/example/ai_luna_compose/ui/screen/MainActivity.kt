@@ -10,7 +10,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.example.ai_luna_compose.navigation.MyAppNavigation
 import com.example.ai_luna_compose.ui.theme.AI_LUNA_COMPOSETheme
 import com.example.ai_luna_compose.ui.theme.SystemColor
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

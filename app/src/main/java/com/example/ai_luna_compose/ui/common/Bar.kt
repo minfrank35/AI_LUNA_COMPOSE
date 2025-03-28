@@ -59,9 +59,15 @@ fun TitleBar(
             .heightIn(60.dp)
             .background(Color.Transparent)
             .padding(
-                PaddingValues(
-                    start = 24.dp, top = 13.dp, end = 24.dp, bottom = 13.dp
-                )
+                if(type == TitleBarType.BACK_AND_IMAGE_AND_TEXT) {
+                    PaddingValues(
+                        start = 13.dp, top = 13.dp, end = 13.dp, bottom = 13.dp
+                    )
+                } else {
+                    PaddingValues(
+                        start = 24.dp, top = 13.dp, end = 24.dp, bottom = 13.dp
+                    )
+                }
             )
             .windowInsetsPadding(WindowInsets.statusBars),
         verticalAlignment = Alignment.CenterVertically

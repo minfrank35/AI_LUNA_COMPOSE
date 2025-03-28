@@ -30,7 +30,6 @@ object NavRoutes {
     const val CHAT_DETAIL = "chatDetail"
 }
 
-@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun MyAppNavigation() {
     val navController: NavHostController = rememberNavController()

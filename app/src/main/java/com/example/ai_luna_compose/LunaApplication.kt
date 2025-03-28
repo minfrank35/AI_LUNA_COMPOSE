@@ -11,7 +11,8 @@ class LunaApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        Thread.setDefaultUncaughtExceptionHandler { _, _ ->
+        Thread.setDefaultUncaughtExceptionHandler { _, e ->
+            e.printStackTrace()
             val exceptionHandler : GlobalExceptionHandler = ErrorActivityExceptionHandler()
             exceptionHandler.caughtException()
         }
@@ -28,12 +29,10 @@ class LunaApplication : Application() {
 
         private fun startErrorActivity() {
             val intent = Intent(applicationContext, ErrorActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             startActivity(intent)
             exitProcess(2)
         }
-
-
     }
 }

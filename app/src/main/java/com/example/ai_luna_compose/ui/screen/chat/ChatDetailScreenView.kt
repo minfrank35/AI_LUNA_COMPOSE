@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ai_luna_compose.R
 import com.example.ai_luna_compose.domain.entity.ChatItemType
@@ -41,15 +42,13 @@ import com.example.ai_luna_compose.ui.theme.TypographyKorean
 import com.example.ai_luna_compose.util.KeyboardAnimationEffect
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatDetailScreenView() {
     // 예시 채팅 데이터: 채팅 메시지와 시간 정보를 포함한 람다 리스트
-    val viewModel: ChatDetailViewModel = viewModel()
+    val viewModel: ChatDetailViewModel = hiltViewModel()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-//    val isKeyboardOpen by keyboardAsState()
 
     LaunchedEffect(key1 = viewModel.chatList.size) {
         if (viewModel.chatList.isNotEmpty()) {
@@ -68,19 +67,21 @@ fun ChatDetailScreenView() {
         listState.scrollBy(targetOffset)
     }
 
-    KeyboardAnimationEffect(
-        onProgressFraction = { fraction ->
-            progressFraction.value = fraction
-        },
-        onAnimationEnd = {
-            // 애니메이션 종료 시 최종 스크롤 위치 조정
-            coroutineScope.launch {
-                if (viewModel.chatList.isNotEmpty()) {
-                    listState.animateScrollToItem(viewModel.chatList.size - 1)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        KeyboardAnimationEffect(
+            onProgressFraction = { fraction ->
+                progressFraction.value = fraction
+            },
+            onAnimationEnd = {
+                // 애니메이션 종료 시 최종 스크롤 위치 조정
+                coroutineScope.launch {
+                    if (viewModel.chatList.isNotEmpty()) {
+                        listState.animateScrollToItem(viewModel.chatList.size - 1)
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 
 
     Box {

@@ -76,6 +76,10 @@ class ErrorActivity : ComponentActivity() {
                     Modifier
                         .fillMaxWidth()
                         .padding(start = 17.dp, end = 17.dp, bottom = 15.dp)
+                        .background(
+                            color = MaterialTheme.colors.primary,
+                            shape = RoundedCornerShape(10.dp)
+                        )
                         .clickable {
                             val mainIntent = Intent(this@ErrorActivity, MainActivity::class.java)
                             mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -83,10 +87,6 @@ class ErrorActivity : ComponentActivity() {
                             startActivity(mainIntent)
                             finish()
                         }
-                        .background(
-                            color = MaterialTheme.colors.primary,
-                            shape = RoundedCornerShape(10.dp)
-                        )
                         .padding(17.dp)
                         ,
                     contentAlignment = Alignment.Center
